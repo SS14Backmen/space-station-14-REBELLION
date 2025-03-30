@@ -241503,6 +241503,20 @@ entities:
     - type: Transform
       pos: 109.50452,-22.239302
       parent: 2
+- proto: TorsoSkeleton
+  entities:
+  - uid: 33478
+    components:
+    - type: Transform
+      pos: 65.5,-50.5
+      parent: 2
+- proto: TorsoSlime
+  entities:
+  - uid: 16254
+    components:
+    - type: Transform
+      pos: 14.529345,-30.873055
+      parent: 2
 - proto: TowelColorNT
   entities:
   - uid: 1792
