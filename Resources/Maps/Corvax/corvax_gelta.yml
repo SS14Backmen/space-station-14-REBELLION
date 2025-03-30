@@ -136960,6 +136960,7 @@ entities:
           - 38178
           - 38182
           - 38184
+          - 38191
         paper_label: !type:ContainerSlot
           showEnts: False
           occludes: True
@@ -268528,6 +268529,22 @@ entities:
     - type: Transform
       pos: 43.700527,-24.265348
       parent: 13307
+- proto: TorsoHuman
+  entities:
+  - uid: 27998
+    components:
+    - type: Transform
+      pos: 74.405785,-38.394585
+      parent: 13307
+- proto: TorsoVulpkanin
+  entities:
+  - uid: 38191
+    components:
+    - type: Transform
+      parent: 37590
+    - type: Physics
+      canCollide: False
+    - type: InsideEntityStorage
 - proto: ToyAi
   entities:
   - uid: 13088
