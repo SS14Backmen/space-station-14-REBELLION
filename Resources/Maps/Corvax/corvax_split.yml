@@ -258223,13 +258223,6 @@ entities:
     - type: Transform
       pos: 59.462196,3.473733
       parent: 10755
-- proto: TorsoBorg
-  entities:
-  - uid: 23472
-    components:
-    - type: Transform
-      pos: 36.457973,23.374575
-      parent: 10755
 - proto: ToyFigurineBartender
   entities:
   - uid: 35206

@@ -98122,6 +98122,16 @@ entities:
       pos: -53.47,14.531252
       parent: 2
     - type: Armor
+      coverage:
+      - Chest
+      - Groin
+      - Arm
+      - Hand
+      - Leg
+      - Foot
+      - Tail
+      - Other
+      dismembermentChanceDeduction: 1
       modifiers:
         flatReductions: {}
         coefficients:
