@@ -15,17 +15,16 @@ using Content.Shared.Item;
 using Content.Shared.Popups;
 using Robust.Shared.Prototypes;
 using System.Linq;
+using Content.Shared.Backmen.Surgery;
 using Content.Shared.Backmen.Mood;
+using Content.Shared.Backmen.Surgery.Body.Events;
 using Content.Shared.Backmen.Surgery.Body.Organs;
 using Content.Shared.Backmen.Surgery.Effects.Step;
 using Content.Shared.Backmen.Surgery.Steps;
 using Content.Shared.Backmen.Surgery.Steps.Parts;
 using Content.Shared.Backmen.Surgery.Tools;
-using Content.Shared.Backmen.Surgery.Traumas;
-using Content.Shared.Backmen.Surgery.Traumas.Components;
-using Content.Shared.Backmen.Surgery.Wounds.Components;
 using Content.Shared.Containers.ItemSlots;
-using Robust.Shared.Utility;
+using AmputateAttemptEvent = Content.Shared.Body.Events.AmputateAttemptEvent;
 
 namespace Content.Shared.Backmen.Surgery;
 
@@ -55,7 +54,6 @@ public abstract partial class SharedSurgerySystem
         SubSurgery<SurgeryAffixOrganStepComponent>(OnAffixOrganStep, OnAffixOrganCheck);
         SubSurgery<SurgeryAddMarkingStepComponent>(OnAddMarkingStep, OnAddMarkingCheck);
         SubSurgery<SurgeryRemoveMarkingStepComponent>(OnRemoveMarkingStep, OnRemoveMarkingCheck);
-        SubSurgery<SurgeryTraumaTreatmentStepComponent>(OnTraumaTreatmentStep, OnTraumaTreatmentCheck);
         Subs.BuiEvents<SurgeryTargetComponent>(SurgeryUIKey.Key, subs =>
         {
             subs.Event<SurgeryStepChosenBuiMsg>(OnSurgeryTargetStepChosen);
@@ -251,11 +249,6 @@ public abstract partial class SharedSurgerySystem
         return metaData.EntityPrototype?.ID;
     }
 
-    private string GetDamageGroupByType(string id)
-    {
-        return (from @group in _prototypes.EnumeratePrototypes<DamageGroupPrototype>() where @group.DamageTypes.Contains(id) select @group.ID).FirstOrDefault()!;
-    }
-
     // I wonder if theres not a function that can do this already.
     private bool HasDamageGroup(EntityUid entity, string[] group, out DamageableComponent? damageable)
     {
@@ -266,13 +259,8 @@ public abstract partial class SharedSurgerySystem
         }
 
         damageable = damageableComp;
-        if (TryComp<WoundableComponent>(entity, out var woundable))
-        {
-            return _wounds.GetWoundableWounds(entity, woundable)
-                .Any(wounds => GetDamageGroupByType(group.FirstOrDefault()!) == wounds.Comp.DamageGroup);
-        }
-
         return group.Any(damageType => damageableComp.Damage.DamageDict.TryGetValue(damageType, out var value) && value > 0);
+
     }
 
     private void OnTendWoundsStep(Entity<SurgeryTendWoundsEffectComponent> ent, ref SurgeryStepEvent args)
@@ -331,7 +319,7 @@ public abstract partial class SharedSurgerySystem
 
     private void OnCavityStep(Entity<SurgeryStepCavityEffectComponent> ent, ref SurgeryStepEvent args)
     {
-        if (!TryComp(args.Part, out BodyPartComponent? partComp) || partComp.PartType != BodyPartType.Chest)
+        if (!TryComp(args.Part, out BodyPartComponent? partComp) || partComp.PartType != BodyPartType.Torso)
             return;
 
         var activeHandEntity = _hands.EnumerateHeld(args.User).FirstOrDefault();
@@ -372,9 +360,11 @@ public abstract partial class SharedSurgerySystem
                 var slotName = removedComp.Symmetry != null
                     ? $"{removedComp.Symmetry?.ToString().ToLower()} {removedComp.Part.ToString().ToLower()}"
                     : removedComp.Part.ToString().ToLower();
-                _body.TryCreatePartSlot(args.Part, slotName, partComp.PartType, out _, partComp.Symmetry);
+                _body.TryCreatePartSlot(args.Part, slotName, partComp.PartType, out _);
                 _body.AttachPart(args.Part, slotName, tool);
                 EnsureComp<BodyPartReattachedComponent>(tool);
+                var ev = new BodyPartAttachedEvent((tool, partComp));
+                RaiseLocalEvent(args.Body, ref ev);
             }
         }
     }
@@ -385,10 +375,16 @@ public abstract partial class SharedSurgerySystem
             return;
 
         var targetPart = _body.GetBodyChildrenOfType(args.Body, removedComp.Part, symmetry: removedComp.Symmetry).FirstOrDefault();
+
         if (targetPart != default)
         {
             // We reward players for properly affixing the parts by healing a little bit of damage, and enabling the part temporarily.
-            _wounds.TryHealWoundsOnWoundable(targetPart.Id, 12f, out _, damageGroup: "Brute");
+            var ev = new BodyPartEnableChangedEvent(true);
+            RaiseLocalEvent(targetPart.Id, ref ev);
+            _damageable.TryChangeDamage(args.Body,
+                _body.GetHealingSpecifier(targetPart.Component) * 2,
+                canSever: false, // Just in case we heal a brute damage specifier and the logic gets fucky lol
+                targetPart: _body.GetTargetBodyPart(targetPart.Component.PartType, targetPart.Component.Symmetry));
             RemComp<BodyPartReattachedComponent>(targetPart.Id);
         }
     }
@@ -418,10 +414,8 @@ public abstract partial class SharedSurgerySystem
             || partComp.Body != args.Body)
             return;
 
-        if (!_body.TryGetParentBodyPart(args.Part, out var parentPart, out _))
-            return;
-
-        _wounds.AmputateWoundableSafely(parentPart.Value, args.Part);
+        var ev = new AmputateAttemptEvent(args.Part);
+        RaiseLocalEvent(args.Part, ref ev);
         _hands.TryPickupAnyHand(args.User, args.Part);
     }
 
@@ -611,64 +605,6 @@ public abstract partial class SharedSurgerySystem
 
     }
 
-    private void OnTraumaTreatmentStep(Entity<SurgeryTraumaTreatmentStepComponent> ent, ref SurgeryStepEvent args)
-    {
-        var healAmount = ent.Comp.Amount;
-        switch (ent.Comp.TraumaType)
-        {
-            case TraumaType.OrganDamage:
-                foreach (var organ in _body.GetBodyOrgans(args.Body))
-                {
-                    if (organ.Component.OrganIntegrity == organ.Component.IntegrityCap)
-                        continue;
-
-                    foreach (var modifier in organ.Component.IntegrityModifiers)
-                    {
-                        var delta = healAmount - modifier.Value;
-                        if (delta > 0)
-                        {
-                            _trauma.TryChangeOrganDamageModifier(
-                                organ.Id,
-                                -modifier.Value,
-                                modifier.Key.Item2,
-                                modifier.Key.Item1,
-                                organ.Component);
-                            healAmount -= modifier.Value;
-                        }
-                        else
-                        {
-                            _trauma.TryChangeOrganDamageModifier(
-                                organ.Id,
-                                -healAmount,
-                                modifier.Key.Item2,
-                                modifier.Key.Item1,
-                                organ.Component);
-                            break;
-                        }
-                    }
-                }
-
-                break;
-
-            case TraumaType.BoneDamage:
-                if (!TryComp<WoundableComponent>(args.Part, out var woundable))
-                    return;
-
-                var bone = woundable.Bone!.ContainedEntities.FirstOrNull();
-                if (bone == null || !TryComp<BoneComponent>(bone, out var boneComp))
-                    return;
-
-                _trauma.ApplyDamageToBone(bone.Value, -healAmount, boneComp);
-                break;
-        }
-    }
-
-    private void OnTraumaTreatmentCheck(Entity<SurgeryTraumaTreatmentStepComponent> ent, ref SurgeryStepCompleteCheckEvent args)
-    {
-        if (_trauma.HasWoundableTrauma(args.Part, ent.Comp.TraumaType))
-            args.Cancelled = true;
-    }
-
     private void OnSurgeryTargetStepChosen(Entity<SurgeryTargetComponent> ent, ref SurgeryStepChosenBuiMsg args)
     {
         var user = args.Actor;
@@ -831,8 +767,7 @@ public abstract partial class SharedSurgerySystem
         var slot = type switch
         {
             BodyPartType.Head => SlotFlags.HEAD,
-            BodyPartType.Chest => SlotFlags.OUTERCLOTHING | SlotFlags.INNERCLOTHING,
-            BodyPartType.Groin => SlotFlags.OUTERCLOTHING | SlotFlags.INNERCLOTHING,
+            BodyPartType.Torso => SlotFlags.OUTERCLOTHING | SlotFlags.INNERCLOTHING,
             BodyPartType.Arm => SlotFlags.OUTERCLOTHING | SlotFlags.INNERCLOTHING,
             BodyPartType.Hand => SlotFlags.GLOVES,
             BodyPartType.Leg => SlotFlags.OUTERCLOTHING | SlotFlags.LEGS,
