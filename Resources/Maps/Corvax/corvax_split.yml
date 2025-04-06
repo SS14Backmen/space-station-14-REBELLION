@@ -135132,7 +135132,7 @@ entities:
     - type: Transform
       pos: -45.264572,18.649134
       parent: 720
-- proto: EpinephrineChemistryBottle
+- proto: ChemistryBottleEpinephrine
   entities:
   - uid: 5025
     components:
@@ -259278,7 +259278,7 @@ entities:
     - type: Transform
       pos: 6.5,-17.5
       parent: 21326
-- proto: UnstableMutagenChemistryBottle
+- proto: ChemistryBottleUnstableMutagen
   entities:
   - uid: 46389
     components:

@@ -221390,7 +221390,7 @@ entities:
     - type: Transform
       pos: -87.48833,28.387346
       parent: 2
-- proto: EpinephrineChemistryBottle
+- proto: ChemistryBottleEpinephrine
   entities:
   - uid: 1757
     components:
@@ -314480,7 +314480,7 @@ entities:
     - type: Transform
       pos: 10.321535,10.346926
       parent: 66965
-- proto: OmnizineChemistryBottle
+- proto: ChemistryBottleOmnizine
   entities:
   - uid: 17835
     components:
@@ -345285,7 +345285,7 @@ entities:
     - type: Transform
       pos: 27.515024,10.603581
       parent: 2
-- proto: RobustHarvestChemistryBottle
+- proto: ChemistryBottleRobustHarvest
   entities:
   - uid: 6714
     components:
@@ -376764,7 +376764,7 @@ entities:
       rot: 4.71238898038469 rad
       pos: -14.145729,55.659485
       parent: 2
-- proto: UnstableMutagenChemistryBottle
+- proto: ChemistryBottleUnstableMutagen
   entities:
   - uid: 6716
     components:

@@ -122459,7 +122459,7 @@ entities:
       parent: 16851
     - type: Physics
       canCollide: False
-- proto: EpinephrineChemistryBottle
+- proto: ChemistryBottleEpinephrine
   entities:
   - uid: 16853
     components:

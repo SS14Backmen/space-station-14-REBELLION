@@ -3,9 +3,9 @@ meta:
   category: Map
   engineVersion: 248.0.0
   forkId: backmen
-  forkVersion: bdfecc5d6fdb2fc0482c6e8da68e030cc51f755e
-  time: 03/15/2025 11:52:50
-  entityCount: 30950
+  forkVersion: b4954ce3ce3c43d6fc7c57b5a40317b42ad22179
+  time: 03/22/2025 14:38:09
+  entityCount: 30954
 maps:
 - 1
 grids:
@@ -11111,8 +11111,8 @@ entities:
             0: 65535
           7,16:
             0: 255
-            4: 32768
-            6: 8192
+            3: 32768
+            4: 8192
           8,12:
             0: 30583
           8,13:
@@ -11590,8 +11590,8 @@ entities:
             0: 4359
           8,16:
             0: 255
-            3: 8192
-            5: 32768
+            5: 8192
+            6: 32768
           9,12:
             0: 14327
           9,13:
@@ -11604,7 +11604,7 @@ entities:
             0: 30583
           9,16:
             0: 255
-            5: 40960
+            6: 40960
           10,12:
             0: 2032
           10,13:
@@ -11617,7 +11617,7 @@ entities:
             0: 65535
           10,16:
             0: 255
-            5: 40960
+            6: 40960
           11,12:
             0: 30583
           11,13:
@@ -12158,11 +12158,11 @@ entities:
           23,13:
             0: 4369
           8,17:
-            3: 34
-            5: 136
+            5: 34
+            6: 136
           7,17:
-            4: 136
-            6: 34
+            3: 136
+            4: 34
           8,18:
             1: 61471
           7,18:
@@ -12176,7 +12176,7 @@ entities:
           9,19:
             1: 29936
           9,17:
-            5: 170
+            6: 170
           9,20:
             1: 62579
           10,18:
@@ -12184,7 +12184,7 @@ entities:
           10,19:
             1: 17532
           10,17:
-            5: 170
+            6: 170
           10,20:
             1: 29764
           11,18:
@@ -12898,29 +12898,6 @@ entities:
         - volume: 2500
           temperature: 293.15
           moles:
-          - 0
-          - 0
-          - 0
-          - 6666.982
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-          - 0
-        - volume: 2500
-          temperature: 293.15
-          moles:
           - 6666.982
           - 0
           - 0
@@ -12945,7 +12922,7 @@ entities:
           temperature: 293.15
           moles:
           - 0
-          - 0
+          - 6666.982
           - 0
           - 0
           - 0
@@ -12968,7 +12945,30 @@ entities:
           temperature: 293.15
           moles:
           - 0
+          - 0
+          - 0
           - 6666.982
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+          - 0
+        - volume: 2500
+          temperature: 293.15
+          moles:
+          - 0
+          - 0
           - 0
           - 0
           - 0
@@ -53816,6 +53816,13 @@ entities:
       rot: 3.141592653589793 rad
       pos: 40.755524,15.524686
       parent: 2
+- proto: CaptainDrobe
+  entities:
+  - uid: 11298
+    components:
+    - type: Transform
+      pos: -62.5,35.5
+      parent: 2
 - proto: CarbonDioxideCanister
   entities:
   - uid: 7610
@@ -76063,13 +76070,6 @@ entities:
     components:
     - type: Transform
       pos: -44.5,-20.5
-      parent: 2
-- proto: DresserCaptainFilled
-  entities:
-  - uid: 11298
-    components:
-    - type: Transform
-      pos: -62.5,35.5
       parent: 2
 - proto: DresserChiefEngineerFilled
   entities:
@@ -161706,7 +161706,7 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -13.295374,6.602215
       parent: 2
-- proto: RobustHarvestChemistryBottle
+- proto: ChemistryBottleRobustHarvest
   entities:
   - uid: 24118
     components:
@@ -167866,6 +167866,18 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 12.311935,78.58198
       parent: 2
+- proto: SpawnJobBkmVirologist
+  entities:
+  - uid: 30951
+    components:
+    - type: Transform
+      pos: -78.5,13.5
+      parent: 2
+  - uid: 30952
+    components:
+    - type: Transform
+      pos: -80.5,13.5
+      parent: 2
 - proto: SpawnMobAlexander
   entities:
   - uid: 25113
@@ -168871,6 +168883,18 @@ entities:
     components:
     - type: Transform
       pos: 42.5,26.5
+      parent: 2
+- proto: SpawnPointSurgeon
+  entities:
+  - uid: 30953
+    components:
+    - type: Transform
+      pos: -82.5,-3.5
+      parent: 2
+  - uid: 30954
+    components:
+    - type: Transform
+      pos: -82.5,0.5
       parent: 2
 - proto: SpawnPointTechnicalAssistant
   entities:

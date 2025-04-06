@@ -149235,7 +149235,7 @@ entities:
     - type: Transform
       pos: 11.4723425,-63.475094
       parent: 13307
-- proto: EpinephrineChemistryBottle
+- proto: ChemistryBottleEpinephrine
   entities:
   - uid: 6393
     components:
